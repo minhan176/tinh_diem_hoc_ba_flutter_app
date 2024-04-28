@@ -1,0 +1,80 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:tinh_diem_hoc_ba/ad_helper.dart';
+import 'package:tinh_diem_hoc_ba/screen/common_screen.dart';
+
+class Lop11 extends StatefulWidget {
+  const Lop11({super.key});
+
+  @override
+  State<Lop11> createState() => _Lop11State();
+}
+
+class _Lop11State extends State<Lop11> {
+  InterstitialAd? _interstitialAd;
+
+  @override
+  void dispose() {
+    _interstitialAd?.dispose();
+    super.dispose();
+  }
+
+  void _loadAd() {
+    InterstitialAd.load(
+        adUnitId: AdHelper.interstitialAdUnitId,
+        request: AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          onAdLoaded: (ad) {
+            ad.fullScreenContentCallback = FullScreenContentCallback(
+                onAdDismissedFullScreenContent: (ad) {
+                  ad.dispose();
+                  Navigator.pop(context);
+                },
+                onAdFailedToShowFullScreenContent: (ad, error) => ad.dispose());
+
+            _interstitialAd = ad;
+          },
+          onAdFailedToLoad: (error) {},
+        ));
+  }
+
+  List<TextEditingController> controllerList = [];
+  List<GlobalKey> keyList = [
+    GlobalKey(),
+    GlobalKey(),
+  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadAd();
+    controllerList = [
+      TextEditingController(),
+      TextEditingController(),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    print(keyList);
+    return PopScope(
+        canPop: false,
+        onPopInvoked: (_) {
+          if (!_) {
+            if (_interstitialAd != null) {
+              _interstitialAd!.show();
+            } else {
+              Navigator.pop(context);
+            }
+          }
+        },
+        child: CommonScreen(
+          title: 'ĐTB năm lớp 11 và HKI lớp 12',
+          key: SubjectKeys.commonKey,
+          colList: controllerList,
+          colKeyList: keyList,
+          hasLop10: false,
+        ));
+  }
+}
